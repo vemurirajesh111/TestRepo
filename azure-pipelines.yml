@@ -9,7 +9,7 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build Docker image and run SonarQube
+  displayName: Build Docker image and run SonarCloud
   jobs:
   - job: Build
     displayName: Build
@@ -17,26 +17,27 @@ stages:
       vmImage: ubuntu-latest
     steps:
 
-    # 1. Prepare SonarQube
-    - task: SonarQubePrepare@5
+    # 1. Prepare SonarCloud analysis
+    - task: SonarCloudPrepare@1
       inputs:
-        SonarQube: 'SonarQube'   # Name of your service connection
-        scannerMode: 'MSBuild'                      # or 'CLI' if using other languages
-        projectKey: 'my-project-key'
-        projectName: 'My Project'
+        SonarCloud: 'SonarQube'   # name of your SonarCloud service connection
+        organization: 'my-org'    # your SonarCloud organization key
+        scannerMode: 'MSBuild'
+        projectKey: 'docker-sample-app'
+        projectName: 'Docker Sample App'
 
-    # 2. Build your source code (if applicable)
+    # 2. Build your source code
     - task: DotNetCoreCLI@2
       displayName: Build .NET project
       inputs:
         command: 'build'
         projects: '**/*.csproj'
 
-    # 3. Run SonarQube analysis
-    - task: SonarQubeAnalyze@5
+    # 3. Run SonarCloud analysis
+    - task: SonarCloudAnalyze@1
 
     # 4. Publish Quality Gate results
-    - task: SonarQubePublish@5
+    - task: SonarCloudPublish@1
       inputs:
         pollingTimeoutSec: '300'
 
