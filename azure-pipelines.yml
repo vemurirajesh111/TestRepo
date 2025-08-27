@@ -1,7 +1,3 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
 - master
 
@@ -13,15 +9,40 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build image
+  displayName: Build Docker image and run SonarQube
   jobs:
   - job: Build
     displayName: Build
     pool:
       vmImage: ubuntu-latest
     steps:
+
+    # 1. Prepare SonarQube
+    - task: SonarQubePrepare@5
+      inputs:
+        SonarQube: 'test'   # Name of your service connection
+        scannerMode: 'MSBuild'                      # or 'CLI' if using other languages
+        projectKey: 'my-project-key'
+        projectName: 'My Project'
+
+    # 2. Build your source code (if applicable)
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET project
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+
+    # 3. Run SonarQube analysis
+    - task: SonarQubeAnalyze@5
+
+    # 4. Publish Quality Gate results
+    - task: SonarQubePublish@5
+      inputs:
+        pollingTimeoutSec: '300'
+
+    # 5. Build Docker image
     - task: Docker@2
-      displayName: Build an image
+      displayName: Build Docker image
       inputs:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
