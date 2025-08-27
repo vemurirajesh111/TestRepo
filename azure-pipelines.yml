@@ -20,7 +20,7 @@ stages:
     # 1. Prepare SonarQube
     - task: SonarQubePrepare@5
       inputs:
-        SonarQube: 'test'   # Name of your service connection
+        SonarQube: 'SonarQube'   # Name of your service connection
         scannerMode: 'MSBuild'                      # or 'CLI' if using other languages
         projectKey: 'my-project-key'
         projectName: 'My Project'
